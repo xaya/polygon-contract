@@ -4,10 +4,12 @@ The Xaya technology and [SDK](https://github.com/xaya/libxayagame) are,
 mostly, blockchain agnostic, and can be run with another base layer than
 Xaya Core.
 
+## Contracts
+
 This repository contains smart contracts that can form the base layer for
 Xaya to run on EVM-based blockchains like Polygon.
 
-## Account Registry
+### Account Registry
 
 The foundation of Xaya tech is management of *names* (user accounts).
 In this implementation, names are ERC-721 compliant NFTs.  Each name consists
@@ -27,3 +29,21 @@ event that contains some payload data (parsed and interpreted by
 individual games), and optionally transfers WCHI in the same transaction
 to allow for certain types of
 [atomic trading](https://github.com/xaya/xaya/blob/master/doc/xaya/trading.md).
+
+### Policy
+
+The base account registry contract is not upgradable, but it has a configurable
+pointer to a policy contract.  The policy determines the fees for moves
+and registrations, the recipient address of fees, and the validation rules
+for names and moves.
+
+## Deployment
+
+The contracts from this repository have been deployed on various networks.
+
+### Mumbai Testnet
+
+On the Mumbai testnet for Polygon, the contracts are deployed as:
+
+- `XayaAccounts`: [0xA33e8dDb8af7C2dFCA2Dc17077C4Aa7eAbB832Da](https://mumbai.polygonscan.com/address/0xA33e8dDb8af7C2dFCA2Dc17077C4Aa7eAbB832Da)
+- `XayaPolicy`: [0xcEF51ACa83e35e0C0BF4B452206eB2080cf8C003](https://mumbai.polygonscan.com/address/0xcEF51ACa83e35e0C0BF4B452206eB2080cf8C003)
