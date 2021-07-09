@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (C) 2021 Autonomous Worlds Ltd
 
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.4;
 
 /**
  * @dev Interface for a contract that defines the validation and fee
