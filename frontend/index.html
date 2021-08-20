@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html>
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+<title>Xaya Accounts Registry</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+
+<script type="module" src="code.js"></script>
+
+<style type="text/css">
+
+#error
+{
+  color: red;
+}
+
+#chainId,
+#address,
+#balance,
+#approved
+{
+  font-weight: bold;
+}
+
+</style>
+
+</script>
+
+</head>
+<body>
+
+<h1>Xaya Accounts Registry</h1>
+
+<p id="error"></p>
+
+<p>Chain ID: <span id="chainId"></span></p>
+<p>Connected to: <span id="address"></span></p>
+<p>WCHI Balance: <span id="balance"></span></p>
+<p>Approved WCHI: <span id="approved"></span>
+  <button type="button" id="approve">Approve</button></p>
+
+<p>
+  <label for="name">Name:&nbsp;</label>
+  <input type="text" id="name" />
+  <button type="button" id="register">Register</button></p>
+  <textarea id="move"></textarea>
+  <button type="button" id="sendMove">Move</button></p>
+</p>
+
+</body>
+</html>
