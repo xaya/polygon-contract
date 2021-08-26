@@ -1,4 +1,19 @@
 {
+  "name": "@xaya/eth-account-registry",
+  "version": "0.1.0",
+  "description": "The Solidity contracts for the Xaya platform (in particular, the account registry) on EVM blockchains.",
+  "author": "Daniel Kraft <daniel@xaya.io>",
+  "license": "MIT",
+  "homepage": "https://github.com/xaya/polygon-contract",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xaya/polygon-contract.git"
+  },
+  "files": [
+    "/contracts/*.sol",
+    "/build/contracts/*.json",
+    "README.md"
+  ],
   "dependencies": {
     "@openzeppelin/contracts": "4.1.0"
   },
