@@ -81,6 +81,12 @@ contract ("NftMetadata", accounts => {
     });
   });
 
+  it ("should properly escape strings", async () => {
+    assert.equal ((await getDataJson ("x", "äöü\"\\ß"))["name"], "x/äöü\"\\ß");
+    /* This is a character encoded as UTF-16 surrogate pair.  */
+    assert.equal ((await getDataJson ("x", "\uD801\uDC37"))["name"], "x/𐐷");
+  });
+
   it ("should handle namespace configuration correctly", async () => {
     await truffleAssert.reverts (
         m.setNamespaceData ("", "wrong", "", "", {from: other}),

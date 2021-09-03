@@ -3,7 +3,9 @@
 
 pragma solidity ^0.8.4;
 
+import "./HexEscapes.sol";
 import "./INftMetadata.sol";
+import "./Utf8.sol";
 
 import "base64-sol/base64.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -112,8 +114,18 @@ contract NftMetadata is INftMetadata, Ownable
   function jsonStringLiteral (string memory str)
       internal pure returns (string memory)
   {
-    /* FIXME: Do proper escaping!  */
-    return string (abi.encodePacked ("\"", str, "\""));
+    bytes memory data = bytes (str);
+    string memory val = "\"";
+
+    uint offset = 0;
+    while (offset < data.length)
+      {
+        uint32 cp;
+        (cp, offset) = Utf8.decodeCodepoint (data, offset);
+        val = string (abi.encodePacked (val, HexEscapes.jsonCodepoint (cp)));
+      }
+
+    return string (abi.encodePacked (val, "\""));
   }
 
   /**
