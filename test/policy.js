@@ -4,6 +4,7 @@
 const truffleAssert = require ("truffle-assertions");
 const { time } = require ("@openzeppelin/test-helpers");
 
+const NftMetadata = artifacts.require ("NftMetadata");
 const XayaPolicy = artifacts.require ("XayaPolicyTestHelper");
 
 const zeroAddr = "0x0000000000000000000000000000000000000000";
@@ -12,12 +13,32 @@ contract ("XayaPolicy", accounts => {
   let owner = accounts[0];
   let other = accounts[1];
 
-  let pol;
+  let metadata, pol;
   beforeEach (async () => {
-    pol = await XayaPolicy.new (100, {from: owner});
+    metadata = await NftMetadata.new ({from: owner});
+    pol = await XayaPolicy.new (metadata.address, 100, {from: owner});
   });
 
   /* ************************************************************************ */
+
+  it ("should handle metadata contract changes correctly", async () => {
+    let newMetadata = await NftMetadata.new ({from: owner});
+
+    await truffleAssert.reverts (
+        pol.setMetadataContract (newMetadata, {from: other}),
+        "not the owner");
+    await truffleAssert.reverts (
+        pol.setMetadataContract (zeroAddr, {from: owner}),
+        "invalid metadata contract");
+    assert.equal (await pol.metadataContract (), metadata.address);
+
+    let tx = await pol.setMetadataContract (newMetadata.address, {from: owner});
+    truffleAssert.eventEmitted (tx, "MetadataContractChanged", (ev) => {
+      return ev.oldContract === metadata.address
+          && ev.newContract === newMetadata.address;
+    });
+    assert.equal (await pol.metadataContract (), newMetadata.address);
+  });
 
   it ("should handle fee receiver changes correctly", async () => {
     await truffleAssert.reverts (

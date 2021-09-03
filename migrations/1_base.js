@@ -4,6 +4,7 @@
 const truffleContract = require ("truffle-contract");
 const { networks } = require ("../truffle-config.js");
 
+const NftMetadata = artifacts.require ("NftMetadata");
 const XayaAccounts = artifacts.require ("XayaAccounts");
 const XayaPolicy = artifacts.require ("XayaPolicy");
 
@@ -25,6 +26,7 @@ module.exports = async function (deployer, network)
     const decimals = await wchi.decimals ();
     const fee = web3.utils.toBN (10).pow (decimals).muln (initialFeeInCHI);
 
-    const policy = await deployer.deploy (XayaPolicy, fee);
+    const metadata = await deployer.deploy (NftMetadata);
+    const policy = await deployer.deploy (XayaPolicy, metadata.address, fee);
     await deployer.deploy (XayaAccounts, wchi.address, policy.address);
   };

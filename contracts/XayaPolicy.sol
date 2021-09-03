@@ -4,6 +4,7 @@
 pragma solidity ^0.8.4;
 
 import "./IXayaPolicy.sol";
+import "./NftMetadata.sol";
 import "./Utf8.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -29,6 +30,9 @@ contract XayaPolicy is Ownable, IXayaPolicy
 
   /* ************************************************************************ */
 
+  /** @dev The metadata construction contract.  */
+  NftMetadata public metadataContract;
+
   /** @dev The address receiving fee payments in WCHI.  */
   address public override feeReceiver;
 
@@ -47,6 +51,10 @@ contract XayaPolicy is Ownable, IXayaPolicy
    */
   uint public nextFeeAfter;
 
+  /** @dev Emitted when the metadata contract is updated.  */
+  event MetadataContractChanged (NftMetadata oldContract,
+                                 NftMetadata newContract);
+
   /** @dev Emitted when the fee receiver changes.  */
   event FeeReceiverChanged (address oldReceiver, address newReceiver);
 
@@ -58,8 +66,13 @@ contract XayaPolicy is Ownable, IXayaPolicy
 
   /* ************************************************************************ */
 
-  constructor (uint256 initialFee)
+  constructor (NftMetadata metadata, uint256 initialFee)
   {
+    require (metadata != NftMetadata (address (0)),
+             "invalid metadata contract");
+    metadataContract = metadata;
+    emit MetadataContractChanged (NftMetadata (address (0)), metadataContract);
+
     feeReceiver = msg.sender;
     emit FeeReceiverChanged (address (0), feeReceiver);
 
@@ -68,6 +81,18 @@ contract XayaPolicy is Ownable, IXayaPolicy
 
     /* nextFee starts off as zero, which means that
        there is no fee change scheduled.  */
+  }
+
+  /**
+   * @dev Updates the contract that is used for generating metadata.
+   */
+  function setMetadataContract (NftMetadata newContract) public onlyOwner
+  {
+    require (newContract != NftMetadata (address (0)),
+             "invalid metadata contract");
+
+    emit MetadataContractChanged (metadataContract, newContract);
+    metadataContract = newContract;
   }
 
   /**
@@ -143,13 +168,10 @@ contract XayaPolicy is Ownable, IXayaPolicy
     return 0;
   }
 
-  /* ************************************************************************ */
-
-  function tokenUriForName (string memory, string memory)
-      public override pure returns (string memory)
+  function tokenUriForName (string memory ns, string memory name)
+      public override view returns (string memory)
   {
-    /* FIXME: Implement NFT metadata generation.  */
-    return "";
+    return metadataContract.tokenUriForName (ns, name);
   }
 
   /* ************************************************************************ */

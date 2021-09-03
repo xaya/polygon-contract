@@ -3,6 +3,7 @@
 
 pragma solidity ^0.8.4;
 
+import "./NftMetadata.sol";
 import "./XayaPolicy.sol";
 
 /**
@@ -12,8 +13,8 @@ import "./XayaPolicy.sol";
 contract XayaPolicyTestHelper is XayaPolicy
 {
 
-  constructor (uint256 initialFee)
-    XayaPolicy (initialFee)
+  constructor (NftMetadata metadata, uint256 initialFee)
+    XayaPolicy (metadata, initialFee)
   {}
 
   /**
