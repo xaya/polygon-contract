@@ -69,13 +69,13 @@ module.exports = {
         {
           return new HDWalletProvider ({
             privateKeys: [process.env.PRIVKEY],
-            providerOrUrl: "https://polygon-mannet.infura.io/v3/" + process.env.API_KEY
+            providerOrUrl: "https://polygon-mainnet.infura.io/v3/" + process.env.API_KEY
           });
         },
       network_id: 137,
       confirmations: 2,
       timeoutBlocks: 200,
-      gasPrice: web3.utils.toWei ('1', 'gwei'),
+      gasPrice: web3.utils.toWei ('35', 'gwei'),
       wchiAddress: "0xE79feAAA457ad7899357E8E2065a3267aC9eE601"
     },
     xdai: {
