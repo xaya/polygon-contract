@@ -14,8 +14,10 @@ contract ("NftMetadata", accounts => {
     m = await NftMetadata.new ({from: owner});
 
     /* Set a simpler namespace configuration for testing.  */
-    await m.setNamespaceData ("", "default description", "000000", "unknown");
-    await m.setNamespaceData ("p", "player accounts", "ffffff", "player");
+    await m.setNamespaceData ("", "default description", "urlX", "ff0000",
+                              "unknown");
+    await m.setNamespaceData ("p", "player accounts", "urlP", "ff0000",
+                              "player");
   });
 
   /**
@@ -45,10 +47,17 @@ contract ("NftMetadata", accounts => {
    */
   const getDataJson = async (ns, name) => {
     const uri = await m.tokenUriForName (ns, name);
+
     const parts = parseDataUrl (uri);
     assert.equal (parts.length, 2);
     assert.equal (parts[0], "application/json");
-    return JSON.parse (parts[1]);
+
+    /* Verifying the generated SVG image in a unit test is not trivial, so we
+       ignore that here.  */
+    let obj = JSON.parse (parts[1]);
+    delete obj["image"];
+
+    return obj;
   }
 
   /* ************************************************************************ */
@@ -57,7 +66,6 @@ contract ("NftMetadata", accounts => {
     assert.deepEqual (await getDataJson ("p", "domob"), {
       "name": "p/domob",
       "description": "player accounts",
-      "background_color": "ffffff",
       "attributes":
         [
           {"trait_type": "Namespace", "value": "p"},
@@ -71,7 +79,6 @@ contract ("NftMetadata", accounts => {
     assert.deepEqual (await getDataJson ("x", "domob"), {
       "name": "x/domob",
       "description": "default description",
-      "background_color": "000000",
       "attributes":
         [
           {"trait_type": "Namespace", "value": "x"},
@@ -89,10 +96,10 @@ contract ("NftMetadata", accounts => {
 
   it ("should handle namespace configuration correctly", async () => {
     await truffleAssert.reverts (
-        m.setNamespaceData ("", "wrong", "", "", {from: other}),
+        m.setNamespaceData ("", "wrong", "", "", "", {from: other}),
         "not the owner");
     await truffleAssert.reverts (
-        m.setNamespaceData ("p", "wrong", "", "", {from: other}),
+        m.setNamespaceData ("p", "wrong", "", "", "", {from: other}),
         "not the owner");
 
     assert.equal ((await getDataJson ("x", "domob"))["description"],
@@ -100,13 +107,13 @@ contract ("NftMetadata", accounts => {
     assert.equal ((await getDataJson ("p", "domob"))["description"],
                   "player accounts");
 
-    let tx = await m.setNamespaceData ("", "new default desc", "", "",
+    let tx = await m.setNamespaceData ("", "new default desc", "", "", "",
                                        {from: owner});
     truffleAssert.eventEmitted (tx, "NamespaceConfigured", (ev) => {
       return ev.ns === "";
     });
 
-    tx = await m.setNamespaceData ("p", "new player desc", "", "",
+    tx = await m.setNamespaceData ("p", "new player desc", "", "", "",
                                    {from: owner});
     truffleAssert.eventEmitted (tx, "NamespaceConfigured", (ev) => {
       return ev.ns === "p";
@@ -117,8 +124,6 @@ contract ("NftMetadata", accounts => {
     assert.equal ((await getDataJson ("p", "domob"))["description"],
                   "new player desc");
   });
-
-  /* TODO: Test escaping of ", \ and Unicode.  */
 
   /* ************************************************************************ */
 

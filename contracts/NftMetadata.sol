@@ -32,11 +32,14 @@ contract NftMetadata is INftMetadata, Ownable
     /** @dev Description string for names of this namespace.  */
     string description;
 
+    /** @dev Background image used for names in this namespace.  */
+    string bgUrl;
+
     /**
-     * @dev Background colour returned for names of this namespace
-     * in the NFT metadata.
+     * @dev Foreground / text colour used in the SVG image for names
+     * of this namespace.
      */
-    string backgroundColour;
+    string fgColour;
 
     /** @dev Value returned for the "type" attribute.  */
     string typ;
@@ -52,24 +55,63 @@ contract NftMetadata is INftMetadata, Ownable
   /** @dev Emitted when a namespace is reconfigured.  */
   event NamespaceConfigured (string ns);
 
+  /* ************************************************************************ */
+
+  /** @dev Width of the generated SVG.  */
+  string internal constant svgWidth = "512";
+
+  /** @dev Height of the generated SVG.  */
+  string internal constant svgHeight = "256";
+
+  /**
+   * @dev For the SVG generation, we use a table of (maximum) string
+   * lengths (in codepoints) and the corresponding font-size to use.
+   * These structs are individual entries in that table.
+   *
+   * When looking through an array of these structs (which is the look-up
+   * table), the first entry matching a given string is used.  If none match
+   * (as the string is too long), then the last entry is used and the string
+   * is truncated to that entry's length with an ellipsis added.
+   */
+  struct SvgSizeEntry
+  {
+
+    /**
+     * @dev The maximum length of a string in codepoints to match this
+     * table entry.
+     */
+    uint len;
+
+    /** @dev The font-size to use for a matching string.  */
+    string fontSize;
+
+  }
+
+  /* Solidity does not (yet) support simple creation of a constant
+     variable holding the look-up table as SvgSizeEntry[].  Thus we
+     define the actual table as memory array inside the function below.  */
+
+  /* ************************************************************************ */
+
   /**
    * @dev The constructor applies the initial configuration of known
    * namespaces.
    */
   constructor ()
   {
-    defaultConfig.description =
-        "A generic name for the Xaya platform (of unknown type).";
-    defaultConfig.backgroundColour = "999999";
-    defaultConfig.typ = "Unknown";
-    emit NamespaceConfigured ("");
-
+    setNamespaceData ("",
+        "A generic name for the Xaya platform (of unknown type).",
+        "https://arweave.net/TBlWvq3M4jobQLLM7BlI1qdbLqB8_dYC9CLnNJ5CnwE",
+        "ffffff", "Unknown");
     setNamespaceData ("p",
-        "A player account for the Xaya platform.",
-        "3333bb", "Player Account");
+        "A player account for the Xaya platform.  All in-game assets are"
+        " associated to account NFTs.",
+        "https://arweave.net/1-PqW8MR1nM3ZihhsySnlXQAdPjn6rh9zXXcP4TKJRk",
+        "ffffff", "Player Account");
     setNamespaceData ("g",
         "The admin account for a game on the Xaya platform.",
-        "bb3333", "Game");
+        "https://arweave.net/bvDHgYSNAB1yQdlajsmbBDKHFW9SEullON3JKzeiyk4",
+        "ffffff", "Game");
   }
 
   /**
@@ -77,7 +119,7 @@ contract NftMetadata is INftMetadata, Ownable
    * is the empty string, it changes the default configuration instead.
    */
   function setNamespaceData (string memory ns, string memory description,
-                             string memory backgroundColour,
+                             string memory bgUrl, string memory fgColour,
                              string memory typ) public onlyOwner
   {
     NamespaceData storage entry;
@@ -88,7 +130,8 @@ contract NftMetadata is INftMetadata, Ownable
 
     entry.configured = true;
     entry.description = description;
-    entry.backgroundColour = backgroundColour;
+    entry.bgUrl = bgUrl;
+    entry.fgColour = fgColour;
     entry.typ = typ;
 
     emit NamespaceConfigured (ns);
@@ -129,6 +172,96 @@ contract NftMetadata is INftMetadata, Ownable
   }
 
   /**
+   * @dev Encodes a given string as XML escape sequences.  The string
+   * is truncated to the given length.
+   */
+  function xmlStringLiteral (string memory str, uint maxLen)
+      internal pure returns (string memory val, uint len, bool trunc)
+  {
+    bytes memory data = bytes (str);
+
+    val = "";
+    len = 0;
+    trunc = false;
+
+    uint offset = 0;
+    while (offset < data.length)
+      {
+        if (len == maxLen)
+          return (val, len, true);
+
+        uint32 cp;
+        (cp, offset) = Utf8.decodeCodepoint (data, offset);
+        val = string (abi.encodePacked (val, HexEscapes.xmlCodepoint (cp)));
+        ++len;
+      }
+
+    require (len <= maxLen, "string length exceeded");
+  }
+
+  /**
+   * @dev Constructs the NFT image as SVG string.  For simplicity, we already
+   * expect the string to be passed in the full form with ns/name.
+   */
+  function buildSvgImage (string memory fullName, NamespaceData storage config)
+      internal view returns (string memory)
+  {
+    SvgSizeEntry[3] memory sizeTable = [
+      SvgSizeEntry (10, "50"),
+      SvgSizeEntry (16, "30"),
+      SvgSizeEntry (22, "20")
+    ];
+
+    string memory escapedString;
+    string memory fontSize;
+
+    {
+      uint cpLen;
+      bool trunc;
+      (escapedString, cpLen, trunc)
+          = xmlStringLiteral (fullName, sizeTable[sizeTable.length - 1].len);
+
+      if (trunc)
+        {
+          escapedString = string (abi.encodePacked (escapedString, "..."));
+          fontSize = sizeTable[sizeTable.length - 1].fontSize;
+        }
+      else
+        {
+          bool found = false;
+          for (uint i = 0; i < sizeTable.length; ++i)
+            {
+              if (cpLen <= sizeTable[i].len)
+                {
+                  fontSize = sizeTable[i].fontSize;
+                  found = true;
+                  break;
+                }
+            }
+          require (found, "no matching entry found");
+        }
+    }
+
+    return string (abi.encodePacked (
+      "<?xml version='1.0' ?>"
+      "<svg xmlns='http://www.w3.org/2000/svg'"
+      " width='", svgWidth, "'"
+      " height='", svgHeight, "'>"
+
+      "<image x='0' y='0' width='100%' height='100%'"
+      " href='", config.bgUrl, "' />"
+
+      "<text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle'"
+      " fill='#", config.fgColour, "'"
+      " font-size='", fontSize, "' font-family='sans-serif'>",
+      escapedString,
+      "</text>"
+
+      "</svg>"
+    ));
+  }
+
+  /**
    * @dev Constructs the metadata JSON for a given name.
    */
   function buildMetadataJson (string memory ns, string memory name)
@@ -156,13 +289,17 @@ contract NftMetadata is INftMetadata, Ownable
       "]"
     ));
 
-    /* TODO: Add generated image.  */
+    string memory imgData = buildSvgImage (fullName, config);
+    string memory imgUri = buildDataUrl ("image/svg+xml", bytes (imgData));
 
     return string (abi.encodePacked (
       "{",
         "\"name\":",  jsonStringLiteral (fullName),
+        /* The base64-encoded data: URI can be included literally
+           as a JSON string.  This way, we avoid a rather costly
+           re-encoding step.  */
+        ",\"image\":\"", imgUri, "\""
         ",\"description\":", jsonStringLiteral (config.description),
-        ",\"background_color\":", jsonStringLiteral (config.backgroundColour),
         ",\"attributes\":", attributes,
       "}"
     ));

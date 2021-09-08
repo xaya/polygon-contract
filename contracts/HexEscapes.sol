@@ -49,4 +49,22 @@ library HexEscapes
     ));
   }
 
+  /**
+   * @dev Converts a given Unicode codepoint into an XML escape sequence.
+   */
+  function xmlCodepoint (uint32 val) internal pure returns (string memory)
+  {
+    bytes memory res = bytes ("&#x000000;");
+
+    for (uint i = 0; val > 0; ++i)
+      {
+        require (i < 6, "codepoint does not fit into 24 bits");
+
+        res[8 - i] = HEX[val & 0xF];
+        val >>= 4;
+      }
+
+    return string (res);
+  }
+
 }
