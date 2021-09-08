@@ -5,6 +5,7 @@ pragma solidity ^0.8.4;
 
 import "./HexEscapes.sol";
 import "./INftMetadata.sol";
+import "./StringBuilder.sol";
 import "./Utf8.sol";
 
 import "base64-sol/base64.sol";
@@ -158,17 +159,23 @@ contract NftMetadata is INftMetadata, Ownable
       internal pure returns (string memory)
   {
     bytes memory data = bytes (str);
-    string memory val = "\"";
+
+    /* Each codepoint is encoded into a \uXXXX sequence of size 6.  The number
+       of codepoints can never be larger than the byte-size of the UTF-8 string
+       (even with UTF-16 surrogate pairs).  */
+    StringBuilder.Type memory builder = StringBuilder.create (6 * data.length);
 
     uint offset = 0;
     while (offset < data.length)
       {
         uint32 cp;
         (cp, offset) = Utf8.decodeCodepoint (data, offset);
-        val = string (abi.encodePacked (val, HexEscapes.jsonCodepoint (cp)));
+        StringBuilder.append (builder, HexEscapes.jsonCodepoint (cp));
       }
 
-    return string (abi.encodePacked (val, "\""));
+    return string (abi.encodePacked (
+      "\"", StringBuilder.extract (builder), "\""
+    ));
   }
 
   /**
@@ -176,27 +183,27 @@ contract NftMetadata is INftMetadata, Ownable
    * is truncated to the given length.
    */
   function xmlStringLiteral (string memory str, uint maxLen)
-      internal pure returns (string memory val, uint len, bool trunc)
+      internal pure returns (string memory, uint, bool)
   {
     bytes memory data = bytes (str);
 
-    val = "";
-    len = 0;
-    trunc = false;
+    StringBuilder.Type memory builder = StringBuilder.create (10 * data.length);
+    uint len = 0;
 
     uint offset = 0;
     while (offset < data.length)
       {
         if (len == maxLen)
-          return (val, len, true);
+          return (StringBuilder.extract (builder), len, true);
 
         uint32 cp;
         (cp, offset) = Utf8.decodeCodepoint (data, offset);
-        val = string (abi.encodePacked (val, HexEscapes.xmlCodepoint (cp)));
+        StringBuilder.append (builder, HexEscapes.xmlCodepoint (cp));
         ++len;
       }
 
     require (len <= maxLen, "string length exceeded");
+    return (StringBuilder.extract (builder), len, false);
   }
 
   /**
