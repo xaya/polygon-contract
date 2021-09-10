@@ -3,8 +3,8 @@
 
 pragma solidity ^0.8.4;
 
+import "./INftMetadata.sol";
 import "./IXayaPolicy.sol";
-import "./NftMetadata.sol";
 import "./Utf8.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -31,7 +31,7 @@ contract XayaPolicy is Ownable, IXayaPolicy
   /* ************************************************************************ */
 
   /** @dev The metadata construction contract.  */
-  NftMetadata public metadataContract;
+  INftMetadata public metadataContract;
 
   /** @dev The address receiving fee payments in WCHI.  */
   address public override feeReceiver;
@@ -52,8 +52,8 @@ contract XayaPolicy is Ownable, IXayaPolicy
   uint public nextFeeAfter;
 
   /** @dev Emitted when the metadata contract is updated.  */
-  event MetadataContractChanged (NftMetadata oldContract,
-                                 NftMetadata newContract);
+  event MetadataContractChanged (INftMetadata oldContract,
+                                 INftMetadata newContract);
 
   /** @dev Emitted when the fee receiver changes.  */
   event FeeReceiverChanged (address oldReceiver, address newReceiver);
@@ -66,12 +66,12 @@ contract XayaPolicy is Ownable, IXayaPolicy
 
   /* ************************************************************************ */
 
-  constructor (NftMetadata metadata, uint256 initialFee)
+  constructor (INftMetadata metadata, uint256 initialFee)
   {
-    require (metadata != NftMetadata (address (0)),
+    require (metadata != INftMetadata (address (0)),
              "invalid metadata contract");
     metadataContract = metadata;
-    emit MetadataContractChanged (NftMetadata (address (0)), metadataContract);
+    emit MetadataContractChanged (INftMetadata (address (0)), metadataContract);
 
     feeReceiver = msg.sender;
     emit FeeReceiverChanged (address (0), feeReceiver);
@@ -86,9 +86,9 @@ contract XayaPolicy is Ownable, IXayaPolicy
   /**
    * @dev Updates the contract that is used for generating metadata.
    */
-  function setMetadataContract (NftMetadata newContract) public onlyOwner
+  function setMetadataContract (INftMetadata newContract) public onlyOwner
   {
-    require (newContract != NftMetadata (address (0)),
+    require (newContract != INftMetadata (address (0)),
              "invalid metadata contract");
 
     emit MetadataContractChanged (metadataContract, newContract);

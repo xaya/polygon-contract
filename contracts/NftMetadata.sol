@@ -3,6 +3,8 @@
 
 pragma solidity ^0.8.4;
 
+import "./INftMetadata.sol";
+
 import "base64-sol/base64.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -13,7 +15,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * There are certain bits of data that can be configured per namespace,
  * and this state is stored in the contract / can be updated by the owner.
  */
-contract NftMetadata is Ownable
+contract NftMetadata is INftMetadata, Ownable
 {
 
   /* ************************************************************************ */
@@ -158,7 +160,7 @@ contract NftMetadata is Ownable
    * @dev Constructs the full metadata URI for a given name.
    */
   function tokenUriForName (string memory ns, string memory name)
-      public view returns (string memory)
+      public override view returns (string memory)
   {
     bytes memory jsonData = bytes (buildMetadataJson (ns, name));
     return buildDataUrl ("application/json", jsonData);

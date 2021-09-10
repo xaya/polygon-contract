@@ -3,6 +3,8 @@
 
 pragma solidity ^0.8.4;
 
+import "./INftMetadata.sol";
+
 /**
  * @dev Interface for a contract that defines the validation and fee
  * policy for Xaya accounts, as well as the NFT metadata returned for
@@ -13,7 +15,7 @@ pragma solidity ^0.8.4;
  * by the policy (but instead coded into the non-upgradable parts
  * of the account registry).
  */
-interface IXayaPolicy
+interface IXayaPolicy is INftMetadata
 {
 
   /**
@@ -44,12 +46,5 @@ interface IXayaPolicy
    */
   function checkMove (string memory ns, string memory mv)
       external returns (uint256);
-
-  /**
-   * @dev Constructs and returns the token URI that should be returned
-   * as NFT metadata for a given name.
-   */
-  function tokenUriForName (string memory ns, string memory name)
-      external view returns (string memory);
 
 }
