@@ -69,7 +69,7 @@ contract XayaAccounts is ERC721, Ownable, IXayaAccounts
    * token address as well as the (changable) initial policy as arguments.
    */
   constructor (IERC20 wchi, IXayaPolicy initialPolicy)
-    ERC721 ("Xaya Name", "XAYA")
+    ERC721 ("Xaya Test Name", "XAYA")
   {
     wchiToken = wchi;
     policy = initialPolicy;
