@@ -229,8 +229,7 @@ contract XayaAccounts is ERC721, Ownable, IXayaAccounts
     emit Move (ns, name, mv, tokenId, currentNonce,
                msg.sender, amount, receiver);
 
-    currentNonce += 1;
-    nextNonce[tokenId] = currentNonce;
+    nextNonce[tokenId] = currentNonce + 1;
 
     return currentNonce;
   }
