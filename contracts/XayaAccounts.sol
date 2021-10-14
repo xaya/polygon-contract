@@ -161,12 +161,19 @@ contract XayaAccounts is ERC721, Ownable, IXayaAccounts
 
   /* ************************************************************************ */
 
+  /* The following two methods are the main interface for this contract
+     (registration of names and moves).  They are marked as virtual just so
+     we have the ability to override them in subcontracts for specific
+     use-cases, e.g. for instrumentation with state overlays.  There are no
+     direct plans to override those methods (or even set up derived contracts)
+     for production deployment.  */
+
   /**
    * @dev Registers a new name.  The newly minted account NFT will be owned
    * by the caller.  Returns the token ID of the new account.
    */
   function register (string memory ns, string memory name)
-      public override returns (uint256)
+      public virtual override returns (uint256)
   {
     uint256 tokenId = tokenIdForName (ns, name);
 
@@ -197,7 +204,7 @@ contract XayaAccounts is ERC721, Ownable, IXayaAccounts
    */
   function move (string memory ns, string memory name, string memory mv,
                  uint256 nonce, uint256 amount, address receiver)
-      public override returns (uint256)
+      public virtual override returns (uint256)
   {
     uint256 tokenId = tokenIdForName (ns, name);
     require (_isApprovedOrOwner (msg.sender, tokenId),
