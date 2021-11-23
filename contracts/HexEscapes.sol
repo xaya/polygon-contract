@@ -3,6 +3,8 @@
 
 pragma solidity ^0.8.4;
 
+import "./StringBuilder.sol";
+
 /**
  * @dev A Solidity library for escaping UTF-8 characters into
  * hex sequences, e.g. for JSON string literals.
@@ -65,6 +67,29 @@ library HexEscapes
       }
 
     return string (res);
+  }
+
+  /**
+   * @dev Converts a binary string into all-hex characters.
+   */
+  function hexlify (string memory str) internal pure returns (string memory)
+  {
+    bytes memory data = bytes (str);
+    StringBuilder.Type memory builder = StringBuilder.create (2 * data.length);
+
+    for (uint i = 0; i < data.length; ++i)
+      {
+        bytes memory cur = bytes ("xx");
+
+        uint8 val = uint8 (data[i]);
+        cur[1] = HEX[val & 0xF];
+        val >>= 4;
+        cur[0] = HEX[val & 0xF];
+
+        StringBuilder.append (builder, string (cur));
+      }
+
+    return StringBuilder.extract (builder);
   }
 
 }

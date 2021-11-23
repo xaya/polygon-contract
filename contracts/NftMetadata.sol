@@ -53,8 +53,26 @@ contract NftMetadata is INftMetadata, Ownable
   /** @dev The default configuration for unknown namespaces.  */
   NamespaceData public defaultConfig;
 
+  /**
+   * @dev The base URL used to serve data.  The token ID will be appended
+   * to this URI.
+   *
+   * There were a couple of issues with getting OpenSea to properly handle
+   * generated data: URIs.  For this reason, we still implement metadata
+   * generation in the contract (so it is fully on-chain), but serve the
+   * actual tokenURI from a server that "forwards" the on-chain data.
+   *
+   * The URI will be queried for metadata and images with "metadata/xns/xname"
+   * or "image/xns/xname" appended, where xns and xname are the namespace and
+   * name hex-encoded.
+   */
+  string public dataServerUrl;
+
   /** @dev Emitted when a namespace is reconfigured.  */
   event NamespaceConfigured (string ns);
+
+  /** @dev Emitted when the data server URL is updated.  */
+  event DataServerUpdated (string url);
 
   /* ************************************************************************ */
 
@@ -113,6 +131,7 @@ contract NftMetadata is INftMetadata, Ownable
         "The admin account for a game on the Xaya platform.",
         "https://arweave.net/bvDHgYSNAB1yQdlajsmbBDKHFW9SEullON3JKzeiyk4",
         "ffffff", "Game");
+    setDataServerUrl ("https://nft.xaya.io/polygon/");
   }
 
   /**
@@ -136,6 +155,15 @@ contract NftMetadata is INftMetadata, Ownable
     entry.typ = typ;
 
     emit NamespaceConfigured (ns);
+  }
+
+  /**
+   * @dev Sets the data server base URL to the given value.
+   */
+  function setDataServerUrl (string memory newUrl) public onlyOwner
+  {
+    dataServerUrl = newUrl;
+    emit DataServerUpdated (newUrl);
   }
 
   /* ************************************************************************ */
@@ -206,13 +234,19 @@ contract NftMetadata is INftMetadata, Ownable
     return (StringBuilder.extract (builder), len, false);
   }
 
+  /* ************************************************************************ */
+
   /**
-   * @dev Constructs the NFT image as SVG string.  For simplicity, we already
-   * expect the string to be passed in the full form with ns/name.
+   * @dev Constructs the NFT image as SVG data URL.
    */
-  function buildSvgImage (string memory fullName, NamespaceData storage config)
-      internal view returns (string memory)
+  function buildSvgImage (string memory ns, string memory name)
+      external override view returns (string memory)
   {
+    NamespaceData storage config = namespaces[ns];
+    if (!config.configured)
+      config = defaultConfig;
+    string memory fullName = string (abi.encodePacked (ns, "/", name));
+
     SvgSizeEntry[3] memory sizeTable = [
       SvgSizeEntry (10, "50"),
       SvgSizeEntry (16, "30"),
@@ -249,7 +283,7 @@ contract NftMetadata is INftMetadata, Ownable
         }
     }
 
-    return string (abi.encodePacked (
+    return buildDataUrl ("image/svg+xml", abi.encodePacked (
       "<?xml version='1.0' ?>"
       "<svg xmlns='http://www.w3.org/2000/svg'"
       " width='", svgWidth, "'"
@@ -269,16 +303,17 @@ contract NftMetadata is INftMetadata, Ownable
   }
 
   /**
-   * @dev Constructs the metadata JSON for a given name.
+   * @dev Constructs the metadata JSON for a given name and returns it
+   * as data URI.
    */
   function buildMetadataJson (string memory ns, string memory name)
-      internal view returns (string memory)
+      external override view returns (string memory)
   {
     NamespaceData storage config = namespaces[ns];
     if (!config.configured)
       config = defaultConfig;
-
     string memory fullName = string (abi.encodePacked (ns, "/", name));
+
     string memory attributes = string (abi.encodePacked (
       "[",
         "{",
@@ -296,15 +331,14 @@ contract NftMetadata is INftMetadata, Ownable
       "]"
     ));
 
-    string memory imgData = buildSvgImage (fullName, config);
-    string memory imgUri = buildDataUrl ("image/svg+xml", bytes (imgData));
+    string memory imgUri = string (abi.encodePacked (
+      dataServerUrl, "image/",
+      HexEscapes.hexlify (ns), "/", HexEscapes.hexlify (name)
+    ));
 
-    return string (abi.encodePacked (
+    return buildDataUrl ("application/json", abi.encodePacked (
       "{",
         "\"name\":",  jsonStringLiteral (fullName),
-        /* The base64-encoded data: URI can be included literally
-           as a JSON string.  This way, we avoid a rather costly
-           re-encoding step.  */
         ",\"image\":\"", imgUri, "\""
         ",\"description\":", jsonStringLiteral (config.description),
         ",\"attributes\":", attributes,
@@ -313,13 +347,16 @@ contract NftMetadata is INftMetadata, Ownable
   }
 
   /**
-   * @dev Constructs the full metadata URI for a given name.
+   * @dev Constructs the full metadata URI for a given name, delegating
+   * to the configured data server.
    */
   function tokenUriForName (string memory ns, string memory name)
-      public override view returns (string memory)
+      external override view returns (string memory)
   {
-    bytes memory jsonData = bytes (buildMetadataJson (ns, name));
-    return buildDataUrl ("application/json", jsonData);
+    return string (abi.encodePacked (
+      dataServerUrl, "metadata/",
+      HexEscapes.hexlify (ns), "/", HexEscapes.hexlify (name)
+    ));
   }
 
   /* ************************************************************************ */

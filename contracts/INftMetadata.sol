@@ -11,6 +11,19 @@ interface INftMetadata
 {
 
   /**
+   * @dev Constructs the NFT image as SVG data URL.
+   */
+  function buildSvgImage (string memory ns, string memory name)
+      external view returns (string memory);
+
+  /**
+   * @dev Constructs the metadata JSON for a given name and returns it
+   * as data URI.
+   */
+  function buildMetadataJson (string memory ns, string memory name)
+      external view returns (string memory);
+
+  /**
    * @dev Constructs the full metadata URI for a given name.
    */
   function tokenUriForName (string memory ns, string memory name)

@@ -18,7 +18,17 @@ contract ("NftMetadata", accounts => {
                               "unknown");
     await m.setNamespaceData ("p", "player accounts", "urlP", "ff0000",
                               "player");
+
+    /* Set a fixed data server for testing.  */
+    await m.setDataServerUrl ("https://data.server/");
   });
+
+  /**
+   * Helper method to check if a string starts with a given prefix.
+   */
+  const startsWith = (str, prefix) => {
+    return str.substr (0, prefix.length) === prefix;
+  };
 
   /**
    * Helper method that parses a data URL, asserts certain things (e.g. that
@@ -26,8 +36,8 @@ contract ("NftMetadata", accounts => {
    * data as array.
    */
   const parseDataUrl = (url) => {
-    assert.equal (url.substr (0, 5), "data:");
-    url = url.substr (5);
+    assert.isTrue (startsWith (url, "data:"));
+    url = url.substr ("data:".length);
 
     const parts = url.split (",");
     assert.equal (parts.length, 2);
@@ -45,26 +55,22 @@ contract ("NftMetadata", accounts => {
    * Extracts the token URI for a given namespace/name combination from our
    * test contract and decodes it as JSON.
    */
-  const getDataJson = async (ns, name) => {
-    const uri = await m.tokenUriForName (ns, name);
+  const getMetadataJson = async (ns, name) => {
+    const uri = await m.buildMetadataJson (ns, name);
 
     const parts = parseDataUrl (uri);
     assert.equal (parts.length, 2);
     assert.equal (parts[0], "application/json");
 
-    /* Verifying the generated SVG image in a unit test is not trivial, so we
-       ignore that here.  */
-    let obj = JSON.parse (parts[1]);
-    delete obj["image"];
-
-    return obj;
+    return JSON.parse (parts[1]);
   }
 
   /* ************************************************************************ */
 
   it ("should build the expected JSON for player accounts", async () => {
-    assert.deepEqual (await getDataJson ("p", "domob"), {
+    assert.deepEqual (await getMetadataJson ("p", "domob"), {
       "name": "p/domob",
+      "image": "https://data.server/image/70/646F6D6F62",
       "description": "player accounts",
       "attributes":
         [
@@ -76,8 +82,9 @@ contract ("NftMetadata", accounts => {
   });
 
   it ("should build the expected JSON for unknown namespaces", async () => {
-    assert.deepEqual (await getDataJson ("x", "domob"), {
+    assert.deepEqual (await getMetadataJson ("x", "domob"), {
       "name": "x/domob",
+      "image": "https://data.server/image/78/646F6D6F62",
       "description": "default description",
       "attributes":
         [
@@ -89,9 +96,10 @@ contract ("NftMetadata", accounts => {
   });
 
   it ("should properly escape strings", async () => {
-    assert.equal ((await getDataJson ("x", "äöü\"\\ß"))["name"], "x/äöü\"\\ß");
+    assert.equal ((await getMetadataJson ("x", "äöü\"\\ß"))["name"],
+                   "x/äöü\"\\ß");
     /* This is a character encoded as UTF-16 surrogate pair.  */
-    assert.equal ((await getDataJson ("x", "\uD801\uDC37"))["name"], "x/𐐷");
+    assert.equal ((await getMetadataJson ("x", "\uD801\uDC37"))["name"], "x/𐐷");
   });
 
   it ("should handle namespace configuration correctly", async () => {
@@ -102,9 +110,9 @@ contract ("NftMetadata", accounts => {
         m.setNamespaceData ("p", "wrong", "", "", "", {from: other}),
         "not the owner");
 
-    assert.equal ((await getDataJson ("x", "domob"))["description"],
+    assert.equal ((await getMetadataJson ("x", "domob"))["description"],
                   "default description");
-    assert.equal ((await getDataJson ("p", "domob"))["description"],
+    assert.equal ((await getMetadataJson ("p", "domob"))["description"],
                   "player accounts");
 
     let tx = await m.setNamespaceData ("", "new default desc", "", "", "",
@@ -119,10 +127,25 @@ contract ("NftMetadata", accounts => {
       return ev.ns === "p";
     });
 
-    assert.equal ((await getDataJson ("x", "domob"))["description"],
+    assert.equal ((await getMetadataJson ("x", "domob"))["description"],
                   "new default desc");
-    assert.equal ((await getDataJson ("p", "domob"))["description"],
+    assert.equal ((await getMetadataJson ("p", "domob"))["description"],
                   "new player desc");
+  });
+
+  it ("should handle the data server correctly", async () => {
+    await truffleAssert.reverts (
+        m.setDataServerUrl ("https://example.com/", {from: other}),
+        "not the owner");
+    assert.equal (await m.dataServerUrl (), "https://data.server/");
+
+    await m.setDataServerUrl ("https://example.com/", {from: owner});
+    assert.equal (await m.dataServerUrl (), "https://example.com/");
+
+    assert.equal (await m.tokenUriForName ("p", "domob"),
+                  "https://example.com/metadata/70/646F6D6F62");
+    assert.equal (await m.tokenUriForName ("p", "äöü"),
+                  "https://example.com/metadata/70/C3A4C3B6C3BC");
   });
 
   /* ************************************************************************ */
