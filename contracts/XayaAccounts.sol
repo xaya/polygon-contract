@@ -131,6 +131,14 @@ contract XayaAccounts is ERC721, Ownable, IXayaAccounts
   }
 
   /**
+   * @dev Returns a link to the contract-level metadata used by OpenSea.
+   */
+  function contractURI () public view returns (string memory)
+  {
+    return policy.contractUri ();
+  }
+
+  /**
    * @dev Schedules an update to the policy implementation.
    */
   function schedulePolicyChange (IXayaPolicy newPolicy) public onlyOwner

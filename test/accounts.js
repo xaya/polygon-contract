@@ -77,6 +77,8 @@ contract ("XayaAccounts", accounts => {
   });
 
   it ("should return metadata per the policy", async () => {
+    assert.equal (await xa.contractURI (), "contract metadata");
+
     const id = await xa.tokenIdForName ("p", "foo");
     await truffleAssert.reverts (xa.tokenURI (id), "no matching account");
     await xa.register ("p", "foo", {from: alice});

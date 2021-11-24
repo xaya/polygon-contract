@@ -174,6 +174,11 @@ contract XayaPolicy is Ownable, IXayaPolicy
     return metadataContract.tokenUriForName (ns, name);
   }
 
+  function contractUri () public override view returns (string memory)
+  {
+    return metadataContract.contractUri ();
+  }
+
   /* ************************************************************************ */
 
 }

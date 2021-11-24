@@ -13,13 +13,12 @@ contract ("NftMetadata", accounts => {
   beforeEach (async () => {
     m = await NftMetadata.new ({from: owner});
 
-    /* Set a simpler namespace configuration for testing.  */
+    /* Update some configurations to fixed values for testing.  */
     await m.setNamespaceData ("", "default description", "urlX", "ff0000",
                               "unknown");
     await m.setNamespaceData ("p", "player accounts", "urlP", "ff0000",
                               "player");
-
-    /* Set a fixed data server for testing.  */
+    await m.setContractMetadata ("https://contract.meta/");
     await m.setDataServerUrl ("https://data.server/");
   });
 
@@ -131,6 +130,16 @@ contract ("NftMetadata", accounts => {
                   "new default desc");
     assert.equal ((await getMetadataJson ("p", "domob"))["description"],
                   "new player desc");
+  });
+
+  it ("should handle contract-level metadata", async () => {
+    await truffleAssert.reverts (
+        m.setContractMetadata ("https://example.com/", {from: other}),
+        "not the owner");
+    assert.equal (await m.contractUri (), "https://contract.meta/");
+
+    await m.setContractMetadata ("https://example.com/", {from: owner});
+    assert.equal (await m.contractUri (), "https://example.com/");
   });
 
   it ("should handle the data server correctly", async () => {

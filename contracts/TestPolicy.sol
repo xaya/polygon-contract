@@ -70,4 +70,12 @@ contract TestPolicy is IXayaPolicy
     return name;
   }
 
+  /**
+   * @dev Returns a fake contract metadata link.
+   */
+  function contractUri () external pure override returns (string memory)
+  {
+    return "contract metadata";
+  }
+
 }

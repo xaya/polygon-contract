@@ -51,4 +51,9 @@ interface IXayaPolicy
   function tokenUriForName (string memory ns, string memory name)
       external view returns (string memory);
 
+  /**
+   * @dev Returns the contract-level metadata for OpenSea.
+   */
+  function contractUri () external view returns (string memory);
+
 }

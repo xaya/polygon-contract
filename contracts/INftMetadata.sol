@@ -29,4 +29,9 @@ interface INftMetadata
   function tokenUriForName (string memory ns, string memory name)
       external view returns (string memory);
 
+  /**
+   * @dev Returns a link to the contract-level metadata.
+   */
+  function contractUri () external view returns (string memory);
+
 }

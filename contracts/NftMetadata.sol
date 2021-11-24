@@ -53,6 +53,9 @@ contract NftMetadata is INftMetadata, Ownable
   /** @dev The default configuration for unknown namespaces.  */
   NamespaceData public defaultConfig;
 
+  /** @dev Link to the contract-level metadata.  */
+  string public override contractUri;
+
   /**
    * @dev The base URL used to serve data.  The token ID will be appended
    * to this URI.
@@ -70,6 +73,9 @@ contract NftMetadata is INftMetadata, Ownable
 
   /** @dev Emitted when a namespace is reconfigured.  */
   event NamespaceConfigured (string ns);
+
+  /** @dev Emitted when the contract metadata is updated.  */
+  event ContractMetadataUpdated (string url);
 
   /** @dev Emitted when the data server URL is updated.  */
   event DataServerUpdated (string url);
@@ -131,6 +137,8 @@ contract NftMetadata is INftMetadata, Ownable
         "The admin account for a game on the Xaya platform.",
         "https://arweave.net/bvDHgYSNAB1yQdlajsmbBDKHFW9SEullON3JKzeiyk4",
         "ffffff", "Game");
+    setContractMetadata (
+        "https://arweave.net/O3KatG4kpbSTXx5RENrsz83m4x2OYblg2jvqXW_Cu9c");
     setDataServerUrl ("https://nft.xaya.io/polygon/");
   }
 
@@ -155,6 +163,15 @@ contract NftMetadata is INftMetadata, Ownable
     entry.typ = typ;
 
     emit NamespaceConfigured (ns);
+  }
+
+  /**
+   * @dev Sets the link to the contract-level metadata.
+   */
+  function setContractMetadata (string memory newUrl) public onlyOwner
+  {
+    contractUri = newUrl;
+    emit ContractMetadataUpdated (newUrl);
   }
 
   /**
