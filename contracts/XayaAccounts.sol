@@ -6,7 +6,7 @@ pragma solidity ^0.8.4;
 import "./IXayaAccounts.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
 /**
  * @dev The base contract of Xaya on an EVM chain.  This manages user
@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
  * to modify the policy for name/move validation, fees and the NFT metadata
  * generation (but nothing else).
  */
-contract XayaAccounts is ERC721, Ownable, IXayaAccounts
+contract XayaAccounts is ERC721Enumerable, Ownable, IXayaAccounts
 {
 
   /* ************************************************************************ */
