@@ -1,6 +1,6 @@
 {
   "name": "@xaya/eth-account-registry",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "The Solidity contracts for the Xaya platform (in particular, the account registry) on EVM blockchains.",
   "author": "Daniel Kraft <daniel@xaya.io>",
   "license": "MIT",
