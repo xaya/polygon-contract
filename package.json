@@ -15,13 +15,14 @@
     "README.md"
   ],
   "dependencies": {
-    "base64-sol": "1.0.1",
-    "@openzeppelin/contracts": "4.1.0"
+    "@openzeppelin/contracts": "4.1.0",
+    "base64-sol": "1.0.1"
   },
   "devDependencies": {
-    "truffle-assertions": "",
-    "truffle-contract": "",
     "@openzeppelin/test-helpers": "",
-    "@xaya/wchi": "1.0.0"
+    "@xaya/wchi": "1.0.0",
+    "libxmljs": "",
+    "truffle-assertions": "",
+    "truffle-contract": ""
   }
 }

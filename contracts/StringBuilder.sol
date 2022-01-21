@@ -24,7 +24,7 @@ library StringBuilder
      */
     bytes data;
 
-    /** @dev The maximu / allocated size of the data array.  */
+    /** @dev The maximum / allocated size of the data array.  */
     uint maxLen;
 
   }

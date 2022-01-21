@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
+const libxmljs = require ("libxmljs");
 const truffleAssert = require ("truffle-assertions");
 
 const NftMetadata = artifacts.require ("NftMetadata");
@@ -100,6 +101,31 @@ contract ("NftMetadata", accounts => {
     /* This is a character encoded as UTF-16 surrogate pair.  */
     assert.equal ((await getMetadataJson ("x", "\uD801\uDC37"))["name"], "x/𐐷");
   });
+
+  it ("should build well-formed SVG", async () => {
+    const testOneName = async (ns, name) => {
+      const uri = await m.buildSvgImage (ns, name);
+      const parts = parseDataUrl (uri);
+      assert.equal (parts.length, 2);
+      assert.equal (parts[0], "image/svg+xml");
+
+      /* Check that the constructed payload is at least well-formed
+         XML.  It is not easy to "verify" that it is the "correct" image,
+         but this at least ensures the code is not broken and also does
+         e.g. things like escapes properly.  */
+      libxmljs.parseXml (parts[1]);
+    };
+
+    await testOneName ("p", "domob");
+    await testOneName ("x", "foo");
+    /* This name is not abbreviated but falls into a later size bucket.  */
+    await testOneName ("1234567890", "123456");
+    /* This name gets abbreviated with an ellipsis "..." at the end.  */
+    await testOneName ("this-is-some", "very-very-very-long-name");
+    await testOneName ("ß", "<>");
+  });
+
+  /* ************************************************************************ */
 
   it ("should handle namespace configuration correctly", async () => {
     await truffleAssert.reverts (

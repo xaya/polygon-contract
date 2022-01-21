@@ -247,7 +247,7 @@ contract NftMetadata is INftMetadata, Ownable
         ++len;
       }
 
-    require (len <= maxLen, "string length exceeded");
+    assert (len <= maxLen);
     return (StringBuilder.extract (builder), len, false);
   }
 
@@ -296,7 +296,7 @@ contract NftMetadata is INftMetadata, Ownable
                   break;
                 }
             }
-          require (found, "no matching entry found");
+          assert (found);
         }
     }
 

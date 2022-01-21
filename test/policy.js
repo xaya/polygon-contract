@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 const truffleAssert = require ("truffle-assertions");
 const { time } = require ("@openzeppelin/test-helpers");
@@ -20,6 +20,12 @@ contract ("XayaPolicy", accounts => {
   });
 
   /* ************************************************************************ */
+
+  it ("should require a metadata contract address", async () => {
+    await truffleAssert.reverts (
+        XayaPolicy.new (zeroAddr, 100, {from: owner, gas: 1000000}),
+        "invalid metadata contract");
+  });
 
   it ("should handle metadata contract changes correctly", async () => {
     let newMetadata = await NftMetadata.new ({from: owner});
@@ -185,6 +191,13 @@ contract ("XayaPolicy", accounts => {
                                  "invalid move data");
     await truffleAssert.reverts (pol.checkMove ("p", "abc äöü"),
                                  "invalid move data");
+  });
+
+  it ("should return metadata per the configured contract", async () => {
+    assert.equal (
+        await pol.tokenUriForName ("p", "domob"),
+        await metadata.tokenUriForName ("p", "domob"));
+    assert.equal (await pol.contractUri (), await metadata.contractUri ());
   });
 
   /* ************************************************************************ */

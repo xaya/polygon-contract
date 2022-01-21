@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 const truffleAssert = require ("truffle-assertions");
 const truffleContract = require ("truffle-contract");
@@ -163,10 +163,10 @@ contract ("XayaAccounts", accounts => {
 
   it ("should charge the registration fee", async () => {
     await xa.register ("p", "foo", {from: alice});
-    await xa.register ("p", "x", {from: bob});
+    await xa.register ("p", "zz", {from: bob});
     assert.equal ((await wchi.balanceOf (alice)).toNumber (), 1000000 - 300);
-    assert.equal ((await wchi.balanceOf (bob)).toNumber (), 1000000 - 100);
-    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 400);
+    assert.equal ((await wchi.balanceOf (bob)).toNumber (), 1000000 - 200);
+    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 500);
 
     await wchi.transfer (bob, 1000000 - 300 - 200, {from: alice});
     assert.equal ((await wchi.balanceOf (alice)).toNumber (), 200);
@@ -175,14 +175,14 @@ contract ("XayaAccounts", accounts => {
                                  "insufficient balance");
     await xa.register ("p", "ba", {from: alice});
     assert.equal ((await wchi.balanceOf (alice)).toNumber (), 0);
-    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 600);
+    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 700);
   });
 
   it ("should mint the token correctly", async () => {
     assert.equal ((await xa.balanceOf (alice)).toNumber (), 0);
 
     const id = await xa.tokenIdForName ("p", "foo");
-    xa.register ("p", "foo", {from: alice});
+    await xa.register ("p", "foo", {from: alice});
 
     assert.equal ((await xa.balanceOf (alice)).toNumber (), 1);
     assert.equal (await xa.ownerOf (id), alice);
@@ -256,11 +256,11 @@ contract ("XayaAccounts", accounts => {
     await xa.approve (bob, id, {from: alice});
 
     await xa.move ("p", "foo", "abc", noNonce, 0, zeroAddr, {from: alice});
-    await xa.move ("p", "foo", "x", noNonce, 0, zeroAddr, {from: bob});
+    await xa.move ("p", "foo", "xy", noNonce, 0, zeroAddr, {from: bob});
 
     assert.equal ((await wchi.balanceOf (alice)).toNumber (), 1000000 - 303);
-    assert.equal ((await wchi.balanceOf (bob)).toNumber (), 1000000 - 1);
-    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 304);
+    assert.equal ((await wchi.balanceOf (bob)).toNumber (), 1000000 - 2);
+    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 305);
 
     await wchi.transfer (bob, 1000000 - 303 - 2, {from: alice});
     assert.equal ((await wchi.balanceOf (alice)).toNumber (), 2);
@@ -270,7 +270,7 @@ contract ("XayaAccounts", accounts => {
         "insufficient balance");
     await xa.move ("p", "foo", "ab", noNonce, 0, zeroAddr, {from: alice});
     assert.equal ((await wchi.balanceOf (alice)).toNumber (), 0);
-    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 306);
+    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 307);
   });
 
   it ("should handle payments with moves", async () => {
@@ -283,18 +283,18 @@ contract ("XayaAccounts", accounts => {
         "non-zero amount for zero receiver");
     await xa.move ("p", "foo", "x", noNonce, 0, bob, {from: alice});
 
-    assert.equal ((await wchi.balanceOf (alice)).toNumber (), 1000000 - 301);
+    assert.equal ((await wchi.balanceOf (alice)).toNumber (), 1000000 - 300);
     assert.equal ((await wchi.balanceOf (bob)).toNumber (), 1000000);
-    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 301);
+    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 300);
 
     await truffleAssert.reverts (
-        xa.move ("p", "foo", "x", noNonce, 1000000, alice, {from: bob}),
+        xa.move ("p", "foo", "x", noNonce, 1000001, alice, {from: bob}),
         "insufficient balance");
-    xa.move ("p", "foo", "x", noNonce, 999999, alice, {from: bob});
+    await xa.move ("p", "foo", "x", noNonce, 1000000, alice, {from: bob});
 
-    assert.equal ((await wchi.balanceOf (alice)).toNumber (), 1999999 - 301);
+    assert.equal ((await wchi.balanceOf (alice)).toNumber (), 2000000 - 300);
     assert.equal ((await wchi.balanceOf (bob)).toNumber (), 0);
-    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 302);
+    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 300);
   });
 
   it ("should emit move events correctly", async () => {
@@ -310,6 +310,14 @@ contract ("XayaAccounts", accounts => {
           && ev.mover === bob
           && ev.amount.toNumber () === 42 && ev.receiver === alice;
     });
+  });
+
+  it ("should handle free registrations and moves", async () => {
+    await wchi.approve (xa.address, 0, {from: alice});
+    await xa.register ("p", "x", {from: alice});
+    await xa.move ("p", "x", "y", noNonce, 0, zeroAddr, {from: alice});
+    assert.equal ((await wchi.balanceOf (alice)).toNumber (), 1000000);
+    assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 0);
   });
 
   /* ************************************************************************ */

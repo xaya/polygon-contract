@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 const truffleAssert = require ("truffle-assertions");
 
@@ -79,6 +79,10 @@ contract ("Utf8", accounts => {
     await truffleAssert.reverts (utf8.decodeCodepoint ("0xC080", 0),
                                  "overlong sequence");
     await truffleAssert.reverts (utf8.decodeCodepoint ("0xC0AE", 0),
+                                 "overlong sequence");
+    await truffleAssert.reverts (utf8.decodeCodepoint ("0xE08080", 0),
+                                 "overlong sequence");
+    await truffleAssert.reverts (utf8.decodeCodepoint ("0xF0808080", 0),
                                  "overlong sequence");
   });
 

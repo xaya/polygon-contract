@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
@@ -16,7 +16,7 @@ contract TestPolicy is IXayaPolicy
 {
 
   /** @dev The fee receiver address.  */
-  address public override feeReceiver;
+  address public override immutable feeReceiver;
 
   /**
    * @dev Constructs the contract, setting the policy receiver initially
@@ -28,36 +28,29 @@ contract TestPolicy is IXayaPolicy
   }
 
   /**
-   * @dev Modifies the fee receiver address.  Note that this is callable
-   * by everyone without access checks, which is fine, since we use this
-   * contract only in testing.
-   */
-  function setFeeReceiver (address newReceiver) public
-  {
-    feeReceiver = newReceiver;
-  }
-
-  /**
    * @dev Checks if a name registration is valid.  In this policy, they are
    * valid if the namespace is non-empty.  The fee is 100 units per byte
-   * in the name.
+   * in the name normally, except zero for names with exactly one byte.
    */
   function checkRegistration (string memory ns, string memory name)
       external pure override returns (uint256)
   {
     require (bytes (ns).length > 0, "namespace must not be empty");
-    return 100 * bytes (name).length;
+    bytes memory data = bytes (name);
+    return data.length == 1 ? 0 : 100 * data.length;
   }
 
   /**
    * @dev Checks if a move is valid.  In this policy, a move is valid if
-   * it is not empty.  The fee is one unit per byte in the move data.
+   * it is not empty.  The fee is one unit per byte in the move data,
+   * except for names with exactly one byte, where it is zero.
    */
   function checkMove (string memory, string memory mv)
       external pure override returns (uint256)
   {
-    require (bytes (mv).length > 0, "move data must not be empty");
-    return bytes (mv).length;
+    bytes memory data = bytes (mv);
+    require (data.length > 0, "move data must not be empty");
+    return data.length == 1 ? 0 : data.length;
   }
 
   /**

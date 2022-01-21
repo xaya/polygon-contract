@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
@@ -76,10 +76,11 @@ library Utf8
       require (cp >= 0x80 && cp < 0x800, "overlong sequence");
     else if (numBytes == 3)
       require (cp >= 0x800 && cp < 0x10000, "overlong sequence");
-    else if (numBytes == 4)
-      require (cp >= 0x10000 && cp < 0x110000, "overlong sequence");
     else
-      revert ("invalid number of bytes");
+      {
+        assert (numBytes == 4);
+        require (cp >= 0x10000 && cp < 0x110000, "overlong sequence");
+      }
 
     /* Prevent characters reserved for UTF-16 surrogate pairs.  */
     require (cp < 0xD800 || cp > 0xDFFF, "surrogate-pair character decoded");
@@ -94,7 +95,7 @@ library Utf8
     uint offset = 0;
     while (offset < data.length)
       (, offset) = decodeCodepoint (data, offset);
-    require (offset == data.length, "offset beyond string end");
+    assert (offset == data.length);
   }
 
 }
