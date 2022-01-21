@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
@@ -37,10 +37,6 @@ interface IXayaPolicy
    * Note that the function does not know the exact name.  This ensures that
    * the policy cannot be abused to censor specific names (and the associated
    * game assets) after they have already been accepted for registration.
-   *
-   * FIXME: Should the policy (e.g. for fee) depend on the move's payment
-   * amount?  So that a certain fraction of each in-game payment can be
-   * charged as fee?
    */
   function checkMove (string memory ns, string memory mv)
       external returns (uint256);

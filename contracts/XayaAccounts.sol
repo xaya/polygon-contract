@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
@@ -69,7 +69,7 @@ contract XayaAccounts is ERC721Enumerable, Ownable, IXayaAccounts
    * token address as well as the (changable) initial policy as arguments.
    */
   constructor (IERC20 wchi, IXayaPolicy initialPolicy)
-    ERC721 ("Xaya Test Name", "XAYA")
+    ERC721 ("Xaya Name", "XAYA")
   {
     wchiToken = wchi;
     policy = initialPolicy;
