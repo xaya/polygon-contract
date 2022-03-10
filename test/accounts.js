@@ -312,12 +312,64 @@ contract ("XayaAccounts", accounts => {
     });
   });
 
+  /* ************************************************************************ */
+
   it ("should handle free registrations and moves", async () => {
     await wchi.approve (xa.address, 0, {from: alice});
     await xa.register ("p", "x", {from: alice});
     await xa.move ("p", "x", "y", noNonce, 0, zeroAddr, {from: alice});
     assert.equal ((await wchi.balanceOf (alice)).toNumber (), 1000000);
     assert.equal ((await wchi.balanceOf (feeReceiver)).toNumber (), 0);
+  });
+
+  it ("should properly handle permit signatures", async () => {
+    const id = await xa.tokenIdForName ("p", "foo");
+    await xa.register ("p", "foo", {from: alice});
+
+    /* To be able to sign messages, we need to create a new account
+       explicitly with web3.eth.accounts.wallet (instead of the
+       pre-existing accounts).  This one will own the name but need not
+       have any funds.  */
+    const wallet = web3.eth.accounts.wallet.create (2);
+    await xa.transferFrom (alice, wallet[0].address, id, {from: alice});
+
+    const msg = await xa.permitOperatorMessage (bob);
+    const sgn1 = await wallet[0].sign (msg);
+    const sgn2 = await wallet[0].sign ("something");
+    const sgn3 = await wallet[1].sign (msg);
+
+    await xa.permitOperator (alice, sgn1.signature);
+    await xa.permitOperator (bob, sgn2.signature);
+    await xa.permitOperator (bob, sgn3.signature);
+
+    assert.isFalse (await xa.isApprovedForAll (wallet[0].address, alice));
+    assert.isFalse (await xa.isApprovedForAll (wallet[0].address, bob));
+    await truffleAssert.reverts (
+        xa.transferFrom (wallet[0].address, alice, id, {from: alice}),
+        "is not owner nor approved");
+    await truffleAssert.reverts (
+        xa.transferFrom (wallet[0].address, alice, id, {from: bob}),
+        "is not owner nor approved");
+
+    await xa.permitOperator (bob, sgn1.signature);
+    assert.isTrue (await xa.isApprovedForAll (wallet[0].address, bob));
+    await xa.transferFrom (wallet[0].address, alice, id, {from: bob});
+  });
+
+  it ("should ensure replay protection of permit signatures", async () => {
+    const xa2 = await XayaAccounts.new (wchi.address, policy.address,
+                                        {from: owner});
+
+    const wallet = web3.eth.accounts.wallet.create (2);
+
+    const msg = await xa.permitOperatorMessage (alice);
+    const sgn = await wallet[0].sign (msg);
+
+    await xa.permitOperator (alice, sgn.signature);
+    await xa2.permitOperator (alice, sgn.signature);
+
+    assert.isTrue (await xa.isApprovedForAll (wallet[0].address, alice));
+    assert.isFalse (await xa2.isApprovedForAll (wallet[0].address, alice));
   });
 
   /* ************************************************************************ */

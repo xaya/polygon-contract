@@ -7,6 +7,8 @@ import "./IXayaAccounts.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
  * @dev The base contract of Xaya on an EVM chain.  This manages user
@@ -247,6 +249,37 @@ contract XayaAccounts is ERC721Enumerable, Ownable, IXayaAccounts
     nextNonce[tokenId] = currentNonce + 1;
 
     return currentNonce;
+  }
+
+  /**
+   * @dev Returns the message that needs to be signed for permitOperator.
+   */
+  function permitOperatorMessage (address operator)
+      public view override returns (bytes memory)
+  {
+    return abi.encodePacked (
+        "I permit ",
+        Strings.toHexString (uint160 (operator), 20),
+        " to manage all my Xaya names.\n\nContract: ",
+        Strings.toHexString (uint160 (address (this)), 20),
+        "\nChain: ", Strings.toString (block.chainid));
+  }
+
+  /**
+   * @dev Gives operator approval to manage all names (tokens) owned by
+   * the signer of the permit message.  This method can be called by anyone,
+   * so it can be used for native meta transactions.  Returns the signer
+   * address extracted from the signature.
+   */
+  function permitOperator (address operator, bytes memory signature)
+      public override returns (address)
+  {
+    bytes memory messageToSign = permitOperatorMessage (operator);
+    bytes32 hashToSign = ECDSA.toEthSignedMessageHash (messageToSign);
+    address signer = ECDSA.recover (hashToSign, signature);
+
+    _setApprovalForAll (signer, operator, true);
+    return signer;
   }
 
   /* ************************************************************************ */

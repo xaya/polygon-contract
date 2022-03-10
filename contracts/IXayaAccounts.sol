@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
@@ -79,6 +79,20 @@ interface IXayaAccounts is IERC721
   function move (string memory ns, string memory name, string memory mv,
                  uint256 nonce, uint256 amount, address receiver)
       external returns (uint256);
+
+  /**
+   * @dev Computes and returns the message to be signed for permitOperator.
+   */
+  function permitOperatorMessage (address operator)
+      external view returns (bytes memory);
+
+  /**
+   * @dev Gives approval as per setApprovalForAll to an operator via a signed
+   * permit message.  The owner to whose names permission is given is recovered
+   * from the signature and returned.
+   */
+  function permitOperator (address operator, bytes memory signature)
+      external returns (address);
 
   /**
    * @dev Emitted when a name is registered.

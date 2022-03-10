@@ -15,7 +15,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@openzeppelin/contracts": "4.1.0",
+    "@openzeppelin/contracts": "4.5.0",
     "base64-sol": "1.0.1"
   },
   "devDependencies": {
