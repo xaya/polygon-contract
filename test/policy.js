@@ -189,6 +189,8 @@ contract ("XayaPolicy", accounts => {
     assert.equal ((await pol.checkMove ("p", "abc {\": xyz}")).toNumber (), 0);
     await truffleAssert.reverts (pol.checkMove ("p", "42\n50"),
                                  "invalid move data");
+    await truffleAssert.reverts (pol.checkMove ("p", "abcx\u007F"),
+                                 "invalid move data");
     await truffleAssert.reverts (pol.checkMove ("p", "abc äöü"),
                                  "invalid move data");
   });

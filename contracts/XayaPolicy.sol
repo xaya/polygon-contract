@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
@@ -16,8 +16,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * Names must be valid UTF-8 not including codepoints below 0x20.
  * Name + namespace must be shorter than 256 bytes, in UTF-8 encoded form.
  *
- * Move data must contain only ASCII characters between 0x20 and 0x7F
- * (but no JSON validation is performed).
+ * Move data must contain only ASCII characters between 0x20 and 0x7E,
+ * i.e. the printable set, but no JSON validation is performed.
  *
  * There is a configurable flat fee for registrations, and no fee
  * for moves.
@@ -163,7 +163,7 @@ contract XayaPolicy is Ownable, IXayaPolicy
   {
     bytes memory mvBytes = bytes (mv);
     for (uint i = 0; i < mvBytes.length; ++i)
-      require (mvBytes[i] >= 0x20 && mvBytes[i] < 0x80, "invalid move data");
+      require (mvBytes[i] >= 0x20 && mvBytes[i] <= 0x7E, "invalid move data");
 
     return 0;
   }
