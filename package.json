@@ -20,9 +20,9 @@
   },
   "devDependencies": {
     "@openzeppelin/test-helpers": "",
+    "@truffle/contract": "4.5.1",
     "@xaya/wchi": "1.0.0",
     "libxmljs": "",
-    "truffle-assertions": "",
-    "truffle-contract": ""
+    "truffle-assertions": ""
   }
 }

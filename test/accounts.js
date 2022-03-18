@@ -2,7 +2,7 @@
 // Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
 const truffleAssert = require ("truffle-assertions");
-const truffleContract = require ("truffle-contract");
+const truffleContract = require ("@truffle/contract");
 const { time } = require ("@openzeppelin/test-helpers");
 
 const wchiData = require ("@xaya/wchi/build/contracts/WCHI.json");

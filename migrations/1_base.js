@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (C) 2021-2022 Autonomous Worlds Ltd
 
-const truffleContract = require ("truffle-contract");
+const truffleContract = require ("@truffle/contract");
 const { networks } = require ("../truffle-config.js");
 
 const NftMetadata = artifacts.require ("NftMetadata");
