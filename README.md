@@ -57,3 +57,11 @@ On the Mumbai testnet for Polygon, the contracts are deployed as:
 - `NftMetadata`: [0x96e808B61b2AD2d815F66A7DfabeEF9614febF86](https://mumbai.polygonscan.com/address/0x96e808B61b2AD2d815F66A7DfabeEF9614febF86)
 - `XayaAccounts`: [0xF84Af6Eaf2C50D68aD1EFa22299043B7416CB453](https://mumbai.polygonscan.com/address/0xF84Af6Eaf2C50D68aD1EFa22299043B7416CB453)
 - `XayaPolicy`: [0xDB154ab26f6725F593391Bc7bd1bbF2e93d05DE2](https://mumbai.polygonscan.com/address/0xDB154ab26f6725F593391Bc7bd1bbF2e93d05DE2)
+
+## Audit
+
+The main contract code (excluding NFT metadata generation) has been
+audited by Solidified based on commit
+`6271ae0ec19432b74e3b31be1bf5cadc26dc9793`.  The audit report can be found
+[here](audit/Solidified_20220319.pdf) and in the official [Solidified Github
+account](https://github.com/solidified-platform/audits/blob/master/Audit%20Report%20-%20Xaya.pdf).
