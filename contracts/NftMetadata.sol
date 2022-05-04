@@ -138,7 +138,7 @@ contract NftMetadata is INftMetadata, Ownable
         "https://arweave.net/bvDHgYSNAB1yQdlajsmbBDKHFW9SEullON3JKzeiyk4",
         "ffffff", "Game");
     setContractMetadata (
-        "https://arweave.net/O3KatG4kpbSTXx5RENrsz83m4x2OYblg2jvqXW_Cu9c");
+        "https://arweave.net/Z-nu82Dj_FsYdcjtkCS1kh8iBDY49oqCAMPaZyXAmEc");
     setDataServerUrl ("https://nft.xaya.io/polygon/");
   }
 
