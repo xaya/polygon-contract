@@ -12,7 +12,7 @@ const wchiData = require ("@xaya/wchi/build/contracts/WCHI.json");
 const WCHI = truffleContract (wchiData);
 WCHI.setProvider (XayaAccounts.currentProvider);
 
-const initialFeeInCHI = 10;
+const initialFeeInCHI = 1;
 
 module.exports = async function (deployer, network)
   {
