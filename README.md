@@ -46,17 +46,17 @@ The contracts from this repository have been deployed on various networks.
 
 On the Polygon mainnet, the contracts are deployed as:
 
-- `NftMetadata`: [0x4ea3E827eB33d51E284b4f022288A0629Bfd724F](https://polygonscan.com/address/0x4ea3E827eB33d51E284b4f022288A0629Bfd724F)
-- `XayaAccounts`: [0xCBcfe2b36408Bde1137eD1cf8b1dbD6C9217539b](https://polygonscan.com/address/0xCBcfe2b36408Bde1137eD1cf8b1dbD6C9217539b)
-- `XayaPolicy`: [0xc87eac7C9951439703f1B655C33F81DAa670F56F](https://polygonscan.com/address/0xc87eac7C9951439703f1B655C33F81DAa670F56F)
+- `NftMetadata`: [0xd22BDf8D648f7b4200387D749d0eA0f1000DF8aA](https://polygonscan.com/address/0xd22BDf8D648f7b4200387D749d0eA0f1000DF8aA)
+- `XayaAccounts`: [0x8C12253F71091b9582908C8a44F78870Ec6F304F](https://polygonscan.com/address/0x8C12253F71091b9582908C8a44F78870Ec6F304F)
+- `XayaPolicy`: [0xF02bD419d99d45E4314cAA1131459cC2c0c6BCe0](https://polygonscan.com/address/0xF02bD419d99d45E4314cAA1131459cC2c0c6BCe0)
 
 ### Mumbai Testnet
 
 On the Mumbai testnet for Polygon, the contracts are deployed as:
 
-- `NftMetadata`: [0x96e808B61b2AD2d815F66A7DfabeEF9614febF86](https://mumbai.polygonscan.com/address/0x96e808B61b2AD2d815F66A7DfabeEF9614febF86)
-- `XayaAccounts`: [0xF84Af6Eaf2C50D68aD1EFa22299043B7416CB453](https://mumbai.polygonscan.com/address/0xF84Af6Eaf2C50D68aD1EFa22299043B7416CB453)
-- `XayaPolicy`: [0xDB154ab26f6725F593391Bc7bd1bbF2e93d05DE2](https://mumbai.polygonscan.com/address/0xDB154ab26f6725F593391Bc7bd1bbF2e93d05DE2)
+- `NftMetadata`: [0x9cfF75C2777257ee91C687eD9d81A339F25A52D5](https://mumbai.polygonscan.com/address/0x9cfF75C2777257ee91C687eD9d81A339F25A52D5)
+- `XayaAccounts`: [0xA0C1034c66f82e8EC5d6D3D14e0aA8Ca3fCAD281](https://mumbai.polygonscan.com/address/0xA0C1034c66f82e8EC5d6D3D14e0aA8Ca3fCAD281)
+- `XayaPolicy`: [0x0b2082441eEbC3304725273277197003185bfd7E](https://mumbai.polygonscan.com/address/0x0b2082441eEbC3304725273277197003185bfd7E)
 
 ## Audit
 

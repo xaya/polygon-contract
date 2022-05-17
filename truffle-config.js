@@ -61,7 +61,7 @@ module.exports = {
       network_id: 80001,
       confirmations: 2,
       timeoutBlocks: 200,
-      gasPrice: web3.utils.toWei ('1', 'gwei'),
+      gasPrice: web3.utils.toWei ('35', 'gwei'),
       wchiAddress: "0x35AAfF0B6B0540a667A7f726d86A7644f6A6Eee8"
     },
     matic: {
@@ -75,7 +75,7 @@ module.exports = {
       network_id: 137,
       confirmations: 2,
       timeoutBlocks: 200,
-      gasPrice: web3.utils.toWei ('35', 'gwei'),
+      gasPrice: web3.utils.toWei ('150', 'gwei'),
       wchiAddress: "0xE79feAAA457ad7899357E8E2065a3267aC9eE601"
     },
     xdai: {
