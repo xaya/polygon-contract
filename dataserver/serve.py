@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2021 The Xaya developers
+# Copyright (C) 2021-2025 The Xaya developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -77,7 +77,7 @@ class RequestHandler (BaseHTTPRequestHandler):
     # If the data is SVG, convert it to PNG on the fly.  This makes sure
     # that OpenSea doesn't bitch about external image links.
     if mimeType == "image/svg+xml":
-      payload = cairosvg.svg2png (bytestring=payload)
+      payload = cairosvg.svg2png (bytestring=payload, unsafe=True)
       mimeType = "image/png"
       
     self.send_response (200)
@@ -111,7 +111,7 @@ class DataServer (ThreadingHTTPServer):
   The main server that handles requests for NFT data.
   """
 
-  def __init__ (self, addr, w3, contractJson, pathPrefix):
+  def __init__ (self, addr, w3, caddr, abi, pathPrefix):
     super ().__init__ (addr, RequestHandler)
     self.log = logging.getLogger ("DataServer")
     self.w3 = w3
@@ -120,10 +120,8 @@ class DataServer (ThreadingHTTPServer):
     chainId = self.w3.eth.chain_id
     self.log.info ("Connected to Ethereum chain ID %d" % chainId)
 
-    caddr = contractJson["networks"][str (chainId)]["address"]
     self.log.info ("Using NftMetadata contract at %s" % caddr)
-    self.contract = self.w3.eth.contract (address=caddr,
-                                          abi=contractJson["abi"])
+    self.contract = self.w3.eth.contract (address=caddr, abi=abi)
 
     (host, port) = addr
     self.log.info ("Binding server to %s:%d" % (host, port))
@@ -139,7 +137,9 @@ if __name__ == "__main__":
   parser.add_argument ("--eth_rpc_url", required=True,
                        help="URL for the Ethereum JSON-RPC interface to use")
   parser.add_argument ("--contract_data", required=True,
-                       help="File with compiled NftMetadata contract")
+                       help="File with compiled NftMetadata contract and ABI")
+  parser.add_argument ("--contract_address", required=True,
+                       help="NftMetadata contract address to use")
   parser.add_argument ("--path_prefix", default="/",
                        help="Expected prefix of request paths")
   args = parser.parse_args ()
@@ -158,5 +158,7 @@ if __name__ == "__main__":
   rootLogger.setLevel (logging.INFO)
   rootLogger.addHandler (handler)
 
-  srv = DataServer (addr, w3, contractJson, args.path_prefix)
+  srv = DataServer (addr, w3,
+                    args.contract_address, contractJson["abi"],
+                    args.path_prefix)
   srv.serve_forever ()
