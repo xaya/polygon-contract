@@ -14,14 +14,16 @@
     "/build/contracts/*.json",
     "README.md"
   ],
+  "engines": {
+    "node": "18"
+  },
   "dependencies": {
-    "@openzeppelin/contracts": "4.5.0",
-    "@truffle/hdwallet-provider": "^2.1.15",
-    "base64-sol": "1.0.1"
+    "@openzeppelin/contracts": "file:lib/openzeppelin-contracts/contracts"
   },
   "devDependencies": {
     "@openzeppelin/test-helpers": "",
     "@truffle/contract": "4.5.1",
+    "@truffle/hdwallet-provider": "^2.1.15",
     "@xaya/wchi": "1.0.0",
     "libxmljs": "",
     "truffle-assertions": ""

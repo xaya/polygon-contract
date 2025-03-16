@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021 Autonomous Worlds Ltd
+// Copyright (C) 2021-2025 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
@@ -8,8 +8,8 @@ import "./INftMetadata.sol";
 import "./StringBuilder.sol";
 import "./Utf8.sol";
 
-import "base64-sol/base64.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
 
 /**
  * @dev The logic for constructing the NFT metadata for a given Xaya account
