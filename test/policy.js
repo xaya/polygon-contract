@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021-2022 Autonomous Worlds Ltd
+// Copyright (C) 2021-2025 Autonomous Worlds Ltd
 
 const truffleAssert = require ("truffle-assertions");
 const { time } = require ("@openzeppelin/test-helpers");
@@ -22,7 +22,7 @@ contract ("XayaPolicy", accounts => {
   /* ************************************************************************ */
 
   it ("should require a metadata contract address", async () => {
-    await truffleAssert.reverts (
+    await truffleAssert.fails (
         XayaPolicy.new (zeroAddr, 100, {from: owner, gas: 1000000}),
         "invalid metadata contract");
   });
