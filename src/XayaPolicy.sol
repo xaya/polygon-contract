@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021-2022 Autonomous Worlds Ltd
+// Copyright (C) 2021-2025 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
@@ -141,7 +141,7 @@ contract XayaPolicy is Ownable, IXayaPolicy
     bytes memory nsBytes = bytes (ns);
     bytes memory nameBytes = bytes (name);
 
-    require (nsBytes.length > 0, "namespace must not be empty");
+    require (nsBytes.length == 1, "namespace must be exactly one character");
     require (nsBytes.length + nameBytes.length < 256, "name is too long");
 
     for (uint i = 0; i < nsBytes.length; ++i)

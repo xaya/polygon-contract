@@ -171,24 +171,22 @@ contract XayaPolicyTest is Test
     checkRegistrationWithBytes (ofLength (1), ofLength (254));
     checkRegistrationWithBytes (ofLength (1),
                                 abi.encodePacked (unicode"ß", ofLength (252)));
-    checkRegistrationWithBytes (ofLength (10), ofLength (245));
-    checkRegistrationWithBytes (ofLength (255), ofLength (0));
 
-    vm.expectRevert ("namespace must not be empty");
+    vm.expectRevert ("namespace must be exactly one character");
     pol.checkRegistration ("", "x");
+    vm.expectRevert ("namespace must be exactly one character");
+    pol.checkRegistration ("xx", "x");
 
     vm.expectRevert ("name is too long");
     checkRegistrationWithBytes (ofLength (1), ofLength (255));
     vm.expectRevert ("name is too long");
     checkRegistrationWithBytes (ofLength (1),
                                 abi.encodePacked (unicode"ß", ofLength (253)));
-    vm.expectRevert ("name is too long");
-    checkRegistrationWithBytes (ofLength (10), ofLength (255));
 
     vm.expectRevert ("invalid namespace");
-    pol.checkRegistration ("a b", "x");
+    pol.checkRegistration (" ", "x");
     vm.expectRevert ("invalid namespace");
-    pol.checkRegistration (unicode"äöü", "x");
+    pol.checkRegistration ("\x00", "x");
     vm.expectRevert ("invalid namespace");
     pol.checkRegistration ("X", "x");
     vm.expectRevert ("invalid namespace");
