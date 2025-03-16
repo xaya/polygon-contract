@@ -48,7 +48,7 @@ On the Polygon mainnet, the contracts are deployed as:
 
 - `NftMetadata`: [0xd22BDf8D648f7b4200387D749d0eA0f1000DF8aA](https://polygonscan.com/address/0xd22BDf8D648f7b4200387D749d0eA0f1000DF8aA)
 - `XayaAccounts`: [0x8C12253F71091b9582908C8a44F78870Ec6F304F](https://polygonscan.com/address/0x8C12253F71091b9582908C8a44F78870Ec6F304F)
-- `XayaPolicy`: [0xF02bD419d99d45E4314cAA1131459cC2c0c6BCe0](https://polygonscan.com/address/0xF02bD419d99d45E4314cAA1131459cC2c0c6BCe0)
+- `XayaPolicy`: [0xd81585544e5e219B2E107Ff610E8F35960bd9da6](https://polygonscan.com/address/0xd81585544e5e219B2E107Ff610E8F35960bd9da6)
 
 ### Mumbai Testnet
 
