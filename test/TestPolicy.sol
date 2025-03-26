@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021-2022 Autonomous Worlds Ltd
+// Copyright (C) 2021-2025 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
-import "./IXayaPolicy.sol";
+import "../src/IXayaPolicy.sol";
 
 /**
  * @dev An implementation of IXayaPolicy for use in unit tests, with
