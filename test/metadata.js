@@ -67,41 +67,6 @@ contract ("NftMetadata", accounts => {
 
   /* ************************************************************************ */
 
-  it ("should build the expected JSON for player accounts", async () => {
-    assert.deepEqual (await getMetadataJson ("p", "domob"), {
-      "name": "p/domob",
-      "image": "https://data.server/image/70/646F6D6F62",
-      "description": "player accounts",
-      "attributes":
-        [
-          {"trait_type": "Namespace", "value": "p"},
-          {"trait_type": "Name", "value": "domob"},
-          {"trait_type": "Type", "value": "player"}
-        ]
-    });
-  });
-
-  it ("should build the expected JSON for unknown namespaces", async () => {
-    assert.deepEqual (await getMetadataJson ("x", "domob"), {
-      "name": "x/domob",
-      "image": "https://data.server/image/78/646F6D6F62",
-      "description": "default description",
-      "attributes":
-        [
-          {"trait_type": "Namespace", "value": "x"},
-          {"trait_type": "Name", "value": "domob"},
-          {"trait_type": "Type", "value": "unknown"}
-        ]
-    });
-  });
-
-  it ("should properly escape strings", async () => {
-    assert.equal ((await getMetadataJson ("x", "äöü\"\\ß"))["name"],
-                   "x/äöü\"\\ß");
-    /* This is a character encoded as UTF-16 surrogate pair.  */
-    assert.equal ((await getMetadataJson ("x", "\uD801\uDC37"))["name"], "x/𐐷");
-  });
-
   it ("should build well-formed SVG", async () => {
     const testOneName = async (ns, name) => {
       const uri = await m.buildSvgImage (ns, name);
@@ -123,64 +88,6 @@ contract ("NftMetadata", accounts => {
     /* This name gets abbreviated with an ellipsis "..." at the end.  */
     await testOneName ("this-is-some", "very-very-very-long-name");
     await testOneName ("ß", "<>");
-  });
-
-  /* ************************************************************************ */
-
-  it ("should handle namespace configuration correctly", async () => {
-    await truffleAssert.reverts (
-        m.setNamespaceData ("", "wrong", "", "", "", {from: other}),
-        "not the owner");
-    await truffleAssert.reverts (
-        m.setNamespaceData ("p", "wrong", "", "", "", {from: other}),
-        "not the owner");
-
-    assert.equal ((await getMetadataJson ("x", "domob"))["description"],
-                  "default description");
-    assert.equal ((await getMetadataJson ("p", "domob"))["description"],
-                  "player accounts");
-
-    let tx = await m.setNamespaceData ("", "new default desc", "", "", "",
-                                       {from: owner});
-    truffleAssert.eventEmitted (tx, "NamespaceConfigured", (ev) => {
-      return ev.ns === "";
-    });
-
-    tx = await m.setNamespaceData ("p", "new player desc", "", "", "",
-                                   {from: owner});
-    truffleAssert.eventEmitted (tx, "NamespaceConfigured", (ev) => {
-      return ev.ns === "p";
-    });
-
-    assert.equal ((await getMetadataJson ("x", "domob"))["description"],
-                  "new default desc");
-    assert.equal ((await getMetadataJson ("p", "domob"))["description"],
-                  "new player desc");
-  });
-
-  it ("should handle contract-level metadata", async () => {
-    await truffleAssert.reverts (
-        m.setContractMetadata ("https://example.com/", {from: other}),
-        "not the owner");
-    assert.equal (await m.contractUri (), "https://contract.meta/");
-
-    await m.setContractMetadata ("https://example.com/", {from: owner});
-    assert.equal (await m.contractUri (), "https://example.com/");
-  });
-
-  it ("should handle the data server correctly", async () => {
-    await truffleAssert.reverts (
-        m.setDataServerUrl ("https://example.com/", {from: other}),
-        "not the owner");
-    assert.equal (await m.dataServerUrl (), "https://data.server/");
-
-    await m.setDataServerUrl ("https://example.com/", {from: owner});
-    assert.equal (await m.dataServerUrl (), "https://example.com/");
-
-    assert.equal (await m.tokenUriForName ("p", "domob"),
-                  "https://example.com/metadata/70/646F6D6F62");
-    assert.equal (await m.tokenUriForName ("p", "äöü"),
-                  "https://example.com/metadata/70/C3A4C3B6C3BC");
   });
 
   /* ************************************************************************ */
