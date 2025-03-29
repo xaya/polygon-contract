@@ -101,7 +101,9 @@ contract XayaAccounts is ERC721Enumerable, Ownable, IXayaAccounts
   function tokenIdForName (string memory ns, string memory name)
       public pure override returns (uint256)
   {
-    return uint256 (keccak256 (abi.encodePacked (ns, name)));
+    bytes32 nsHash = keccak256 (abi.encodePacked (ns));
+    bytes32 nameHash = keccak256 (abi.encodePacked (name));
+    return uint256 (keccak256 (abi.encodePacked (nsHash, nameHash)));
   }
 
   /**

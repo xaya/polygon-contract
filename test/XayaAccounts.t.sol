@@ -93,7 +93,7 @@ contract XayaAccountsTest is Test
   {
     uint256 id1 = xa.tokenIdForName ("p", "foo");
     uint256 id2 = xa.tokenIdForName ("p", "bar");
-    uint256 id3 = xa.tokenIdForName ("g", "foo");
+    uint256 id3 = xa.tokenIdForName ("pf", "oo");
     assertNotEq (id1, id2);
     assertNotEq (id1, id3);
     assertNotEq (id2, id3);
