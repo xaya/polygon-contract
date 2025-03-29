@@ -422,15 +422,22 @@ contract XayaAccountsTest is Test
     xa.register ("p", "foo");
     xa.transferFrom (alice, signer1, id);
 
-    bytes memory message = xa.permitOperatorMessage (bob);
+    bytes memory message = xa.permitOperatorMessage (signer1, bob);
     bytes memory sgn1 = sign (message, signer1Key);
     bytes memory sgn2 = sign (abi.encodePacked ("something"), signer1Key);
     bytes memory sgn3 = sign (message, signer2Key);
+    message = xa.permitOperatorMessage (signer2, bob);
+    bytes memory sgn4 = sign (message, signer2Key);
 
     vm.startPrank (charly);
-    xa.permitOperator (alice, sgn1);
-    xa.permitOperator (bob, sgn2);
-    xa.permitOperator (bob, sgn3);
+    vm.expectRevert ("invalid signature");
+    xa.permitOperator (signer1, alice, sgn1);
+    vm.expectRevert ("invalid signature");
+    xa.permitOperator (signer1, bob, sgn2);
+    vm.expectRevert ("invalid signature");
+    xa.permitOperator (signer1, bob, sgn3);
+    /* This one is valid but does not affect signer1 approval of course.  */
+    xa.permitOperator (signer2, bob, sgn4);
 
     assertFalse (xa.isApprovedForAll (signer1, alice));
     assertFalse (xa.isApprovedForAll (signer1, bob));
@@ -444,11 +451,33 @@ contract XayaAccountsTest is Test
     xa.transferFrom (signer1, alice, id);
 
     vm.startPrank (charly);
-    xa.permitOperator (bob, sgn1);
+    xa.permitOperator (signer1, bob, sgn1);
 
     assertTrue (xa.isApprovedForAll (signer1, bob));
     vm.startPrank (bob);
     xa.transferFrom (signer1, alice, id);
+  }
+
+  function test_permitReplayProtection () public
+  {
+    vm.startPrank (signer1);
+
+    bytes memory message = xa.permitOperatorMessage (signer1, alice);
+    bytes memory sgn = sign (message, signer1Key);
+
+    xa.permitOperator (signer1, alice, sgn);
+    assertTrue (xa.isApprovedForAll (signer1, alice));
+
+    xa.setApprovalForAll (alice, false);
+    vm.expectRevert ("invalid signature");
+    xa.permitOperator (signer1, alice, sgn);
+    assertFalse (xa.isApprovedForAll (signer1, alice));
+
+    /* We can re-approve with a new signature.  */
+    message = xa.permitOperatorMessage (signer1, alice);
+    sgn = sign (message, signer1Key);
+    xa.permitOperator (signer1, alice, sgn);
+    assertTrue (xa.isApprovedForAll (signer1, alice));
   }
 
   function test_permitBoundToContract () public
@@ -456,11 +485,12 @@ contract XayaAccountsTest is Test
     vm.startPrank (owner);
     XayaAccounts xa2 = new XayaAccounts (wchi, policy);
 
-    bytes memory message = xa.permitOperatorMessage (alice);
+    bytes memory message = xa.permitOperatorMessage (signer1, alice);
     bytes memory sgn = sign (message, signer1Key);
 
-    xa.permitOperator (alice, sgn);
-    xa2.permitOperator (alice, sgn);
+    xa.permitOperator (signer1, alice, sgn);
+    vm.expectRevert ("invalid signature");
+    xa2.permitOperator (signer1, alice, sgn);
 
     assertTrue (xa.isApprovedForAll (signer1, alice));
     assertFalse (xa2.isApprovedForAll (signer1, alice));

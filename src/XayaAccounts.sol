@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2021-2022 Autonomous Worlds Ltd
+// Copyright (C) 2021-2025 Autonomous Worlds Ltd
 
 pragma solidity ^0.8.4;
 
@@ -44,6 +44,9 @@ contract XayaAccounts is ERC721Enumerable, Ownable, IXayaAccounts
 
   /** @dev Mapping of token IDs to the next nonce for that account.  */
   mapping (uint256 => uint256) public override nextNonce;
+
+  /** @dev Next nonces to use in permit signatures for the given owner.  */
+  mapping (address => uint256) public nextPermitNonce;
 
   /**
    * @dev A full account identifier with namespace and name, for use
@@ -256,7 +259,7 @@ contract XayaAccounts is ERC721Enumerable, Ownable, IXayaAccounts
   /**
    * @dev Returns the message that needs to be signed for permitOperator.
    */
-  function permitOperatorMessage (address operator)
+  function permitOperatorMessage (address owner, address operator)
       public view override returns (bytes memory)
   {
     return abi.encodePacked (
@@ -264,24 +267,29 @@ contract XayaAccounts is ERC721Enumerable, Ownable, IXayaAccounts
         Strings.toHexString (uint160 (operator), 20),
         " to manage all my Xaya names.\n\nContract: ",
         Strings.toHexString (uint160 (address (this)), 20),
+        "\nNonce: ", Strings.toString (nextPermitNonce[owner]),
         "\nChain: ", Strings.toString (block.chainid));
   }
 
   /**
    * @dev Gives operator approval to manage all names (tokens) owned by
-   * the signer of the permit message.  This method can be called by anyone,
-   * so it can be used for native meta transactions.  Returns the signer
-   * address extracted from the signature.
+   * the given owner.  The permit message must be signed by that owner
+   * to be valid.
+   *
+   * This method can be called by anyone, so that it can be used for native
+   * meta transactions.
    */
-  function permitOperator (address operator, bytes memory signature)
-      public override returns (address)
+  function permitOperator (address owner, address operator,
+                           bytes memory signature)
+      public override
   {
-    bytes memory messageToSign = permitOperatorMessage (operator);
+    bytes memory messageToSign = permitOperatorMessage (owner, operator);
     bytes32 hashToSign = ECDSA.toEthSignedMessageHash (messageToSign);
     address signer = ECDSA.recover (hashToSign, signature);
+    require (signer == owner, "invalid signature");
 
-    _setApprovalForAll (signer, operator, true);
-    return signer;
+    _setApprovalForAll (owner, operator, true);
+    ++nextPermitNonce[owner];
   }
 
   /* ************************************************************************ */
