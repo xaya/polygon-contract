@@ -25,6 +25,10 @@ contract XayaPolicyScript is Script
   address public constant feeReceiver
       = 0x2ffAC329b8894Ed2a1EbEF7532F9C1C5199a6af8;
 
+  /** @dev The owner to transfer the contract to.  */
+  address public constant owner
+      = 0xb960bECa8623165a3094a629d6A4775857a14d28;
+
   function run () public
   {
     uint256 privkey = vm.envUint ("PRIVKEY");
@@ -36,6 +40,7 @@ contract XayaPolicyScript is Script
 
     XayaPolicy pol = new XayaPolicy (metadata, fee);
     pol.setFeeReceiver (feeReceiver);
+    pol.transferOwnership (owner);
 
     vm.stopBroadcast ();
   }

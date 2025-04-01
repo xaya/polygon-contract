@@ -158,9 +158,12 @@ contract XayaPolicy is Ownable, IXayaPolicy
     return registrationFee;
   }
 
-  function checkMove (string memory, string memory mv)
+  function checkMove (string memory ns, string memory mv)
       public override pure returns (uint256)
   {
+    bytes memory nsBytes = bytes (ns);
+    require (nsBytes.length == 1, "namespace must be exactly one character");
+
     bytes memory mvBytes = bytes (mv);
     for (uint i = 0; i < mvBytes.length; ++i)
       require (mvBytes[i] >= 0x20 && mvBytes[i] <= 0x7E, "invalid move data");

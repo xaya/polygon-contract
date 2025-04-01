@@ -208,6 +208,9 @@ contract XayaPolicyTest is Test
     assertEq (pol.checkMove ("p", ""), 0);
     assertEq (pol.checkMove ("p", "abc {\": xyz}"), 0);
 
+    vm.expectRevert ("namespace must be exactly one character");
+    pol.checkMove ("px", "");
+
     vm.expectRevert ("invalid move data");
     pol.checkMove ("p", "42\n50");
     vm.expectRevert ("invalid move data");
