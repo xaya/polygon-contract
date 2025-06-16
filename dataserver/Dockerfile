@@ -10,7 +10,7 @@ RUN apk add --no-cache \
   && pip3 install --no-cache-dir cairosvg web3
 
 COPY dataserver/serve.py /usr/local/bin
-COPY build/contracts/NftMetadata.json /usr/local/share
+COPY out/NftMetadata.sol/NftMetadata.json /usr/local/share
 
 LABEL description="Runs the Xaya NFT metadata server"
 EXPOSE 8000
